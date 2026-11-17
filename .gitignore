@@ -1,0 +1,35 @@
+# ==============================================================================
+# PRIVACY & SECURITY ISOLATION
+# Prevents personal screenshots, chat history, and private captures from leaking
+# ==============================================================================
+
+# Personal screenshot captures & QQ screenshots
+QQ_*.png
+screenshot_*.jpg
+screenshot_*.png
+*.tmp.png
+*.tmp.jpg
+
+# Development scratch scripts & local tests
+scratch/
+temp/
+tmp/
+*.log
+
+# Large media files (>100MB GitHub limit) & heavy source dumps
+*.gif
+*4k*
+*.bak
+*.disabled
+
+# Operating System artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor & workspace directories
+.vscode/
+.idea/
+*.sublime-workspace
+node_modules/

@@ -1,0 +1,468 @@
+
+    /* === HATSUNE MIKU // POWERSHELL 7 ACRYLIC GLASS & VIVID GIF THEME === */
+    :root {
+      --background: transparent !important;
+      --color-background: transparent !important;
+      --body-background: transparent !important;
+      --shell: transparent !important;
+      --shell-canvas: transparent !important;
+      
+      --sidebar: rgba(8, 20, 29, 0.7) !important;
+      --color-sidebar: rgba(8, 20, 29, 0.7) !important;
+      --sidebar-secondary: rgba(57, 230, 194, 0.14) !important;
+      --sidebar-muted: rgba(57, 230, 194, 0.06) !important;
+      
+      --card: rgba(10, 26, 38, 0.7) !important;
+      --glass: rgba(10, 26, 38, 0.72) !important;
+      --glass-border: rgba(57, 230, 194, 0.28) !important;
+      --card-border: rgba(57, 230, 194, 0.22) !important;
+      --border: rgba(57, 230, 194, 0.18) !important;
+      
+      --foreground: #D9FFFF !important;
+      --secondary-foreground: #8FFFF0 !important;
+      --muted-foreground: #8EAFC4 !important;
+      --placeholder: #5A7E94 !important;
+      --code-foreground: #39E6C2 !important;
+
+      --primary: #39E6C2 !important;
+      --primary-foreground: #08141D !important;
+      --cta: #39E6C2 !important;
+      --cta-foreground: #08141D !important;
+      --link: #65B8FF !important;
+      --error: #FF5C8A !important;
+      --warning: #F3E97A !important;
+      --success: #39E6C2 !important;
+
+      --focus-ring-color: rgba(57, 230, 194, 0.5) !important;
+      --nux-focus-ring: rgba(57, 230, 194, 0.55) !important;
+
+      --syntax-default-fg: #D9FFFF !important;
+      --syntax-comment: #7D96AB !important;
+      --syntax-punctuation: #A4C6DB !important;
+      --syntax-keyword: #39E6C2 !important;
+      --syntax-property: #FF5C8A !important;
+      --syntax-deleted: #FF5C8A !important;
+      --syntax-inserted: #39E6C2 !important;
+      --syntax-tag: #FF5C8A !important;
+      --syntax-constant: #C792EA !important;
+      --syntax-number: #C792EA !important;
+      --syntax-string: #65B8FF !important;
+      --syntax-operator: #FF83B5 !important;
+      --syntax-variable: #8FFFF0 !important;
+      --syntax-function: #39E6C2 !important;
+
+      --bg-selection: #174052 !important;
+      --fg-cursor: #39E6C2 !important;
+    }
+
+    html, body {
+      background: #08141D !important;
+      overflow: hidden;
+    }
+
+    /* Clear full-screen blur wrappers so Miku GIF is crystal clear */
+    .agy-shell,
+    .agy-inset-shell,
+    .agy-sheet,
+    div[class*="flex-1 min-h-0 flex flex-col"],
+    div[class*="flex-grow overflow-hidden"],
+    div[class*="w-full flex h-full min-h-0 flex-col"] {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Crystal Clear Vivid Miku Animated Background */
+    /* Background video is dynamically mounted via #miku-background-video */
+
+    /* Ambient Cyber Glow behind elements */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 85% 15%, rgba(57, 230, 194, 0.12) 0%, transparent 45%),
+                  radial-gradient(circle at 15% 85%, rgba(255, 92, 138, 0.08) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Top Cyber Neon Glowing Horizon Line */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #39e6c2 0%, #65b8ff 35%, #ff5c8a 70%, #39e6c2 100%);
+      background-size: 200% 100%;
+      z-index: 100;
+      pointer-events: none;
+      animation: mikuHorizonGlow 6s linear infinite;
+      box-shadow: 0 0 14px rgba(57, 230, 194, 0.8), 0 0 28px rgba(255, 92, 138, 0.5);
+    }
+
+    @keyframes mikuHorizonGlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+
+    /* 1. Sidebar Frosted Acrylic Glass */
+    .bg-sidebar,
+    nav.bg-sidebar,
+    div.bg-sidebar {
+      background: rgba(6, 17, 26, 0.72) !important;
+      backdrop-filter: blur(28px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+      border-right: 1px solid rgba(57, 230, 194, 0.22) !important;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* 2. Top Header Navigation Bar */
+    div[class*="flex items-center gap-1 px-2 h-full bg-sidebar"],
+    div[class*="agy-button"][class*="text-base"] {
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+    }
+
+    /* 3. User Message Bubbles (Cyan Frosted Glass) */
+    div[class*="bg-primary/"][class*="text-primary-foreground"],
+    div[data-role="user"] > div,
+    div[class*="justify-end"] > div[class*="rounded"] {
+      background: rgba(18, 48, 68, 0.75) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(57, 230, 194, 0.4) !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 12px rgba(57, 230, 194, 0.15) !important;
+      color: #E8FFFF !important;
+    }
+
+    /* 4. Assistant Cards, Artifacts & Tool Blocks (Deep Charcoal Teal Glass) */
+    div[class*="border-card-border"],
+    div[class*="bg-card"],
+    div[class*="rounded-xl border border-border"],
+    div[class*="rounded-lg border border-border"],
+    [data-testid*="artifact"],
+    div[class*="artifact"] {
+      background: rgba(7, 20, 30, 0.75) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(57, 230, 194, 0.25) !important;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+      border-radius: 12px !important;
+    }
+
+    /* 5. Floating Composer Input Box (Super Frosted Acrylic) */
+    div[class*="composer-frame"],
+    div[class*="composer"] {
+      background: rgba(7, 20, 31, 0.78) !important;
+      backdrop-filter: blur(32px) saturate(220%) !important;
+      -webkit-backdrop-filter: blur(32px) saturate(220%) !important;
+      border: 1.5px solid rgba(57, 230, 194, 0.45) !important;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(57, 230, 194, 0.25) !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      border-radius: 16px !important;
+    }
+    div[class*="composer-frame"]:focus-within,
+    div[class*="composer"]:focus-within {
+      border-color: #39E6C2 !important;
+      background: rgba(9, 25, 38, 0.88) !important;
+      box-shadow: 0 14px 48px rgba(0, 0, 0, 0.65), 0 0 30px rgba(57, 230, 194, 0.5), 0 0 0 1px #39E6C2 !important;
+    }
+
+    /* 6. Code Blocks */
+    pre, code {
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace !important;
+    }
+    pre {
+      background: rgba(4, 12, 18, 0.82) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(57, 230, 194, 0.3) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(57, 230, 194, 0.2) !important;
+    }
+
+    /* 7. Primary Action Buttons */
+    button.bg-primary,
+    button[class*="bg-primary"],
+    button[data-variant="primary"] {
+      background: linear-gradient(135deg, #39E6C2 0%, #1FB293 100%) !important;
+      color: #08141D !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 14px rgba(57, 230, 194, 0.45) !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    button.bg-primary:hover,
+    button[class*="bg-primary"]:hover {
+      box-shadow: 0 4px 24px rgba(57, 230, 194, 0.8), 0 0 12px rgba(255, 92, 138, 0.6) !important;
+      transform: translateY(-1px);
+    }
+
+    /* 8. Sidebar Row Highlights */
+    .agy-sidebar-row {
+      border-left: 2px solid transparent !important;
+      transition: all 0.15s ease !important;
+    }
+    .agy-sidebar-row:hover {
+      background: rgba(57, 230, 194, 0.12) !important;
+      border-left-color: rgba(57, 230, 194, 0.7) !important;
+    }
+    .agy-sidebar-row.bg-sidebar-secondary,
+    .agy-sidebar-row[data-active="true"] {
+      background: rgba(57, 230, 194, 0.18) !important;
+      border-left-color: #39E6C2 !important;
+      box-shadow: inset 4px 0 18px -2px rgba(57, 230, 194, 0.45) !important;
+    }
+    .agy-sidebar-row.bg-sidebar-secondary span,
+    .agy-sidebar-row[data-active="true"] span {
+      color: #39E6C2 !important;
+      font-weight: 600 !important;
+    }
+
+    /* 9. Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(57, 230, 194, 0.35);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(57, 230, 194, 0.8);
+      box-shadow: 0 0 10px rgba(57, 230, 194, 0.9);
+    }
+
+    /* 10. Miku Corner Floating Pill Badge */
+    #miku-status-pill {
+      position: fixed;
+      bottom: 12px;
+      right: 18px;
+      background: rgba(6, 17, 26, 0.82);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border: 1px solid rgba(57, 230, 194, 0.45);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      color: #39E6C2;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 14px rgba(57, 230, 194, 0.3);
+      z-index: 999998;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: 0.5px;
+    }
+    #miku-status-pill .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #39E6C2;
+      box-shadow: 0 0 8px #39E6C2;
+      animation: mikuPulse 2s infinite ease-in-out;
+    }
+    #miku-status-pill .pink-tag {
+      color: #FF5C8A;
+      font-weight: bold;
+    }
+    @keyframes mikuPulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 14px #39E6C2, 0 0 6px #FF5C8A; }
+    }
+  
+
+/* ==========================================================================
+ * SETTINGS MODAL & DIALOG OPAQUE OVERLAY FIX
+ * Ensures settings dialog is 100% solid, crisp, and never overlaps chat text
+ * ========================================================================== */
+
+/* 1. Backdrop Scrim (Heavy frosted blur + dark scrim to hide background text) */
+.settings-modal-backdrop,
+div[class*="settings-modal-backdrop"],
+div[class*="modal-backdrop"],
+div[class*="backdrop-blur"] {
+  background: rgba(3, 8, 12, 0.78) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+
+/* 2. Settings Modal Body & Containers (Solid Opaque Theme) */
+.settings-modal-container,
+.agy-dialog,
+div[class*="settings-modal-container"],
+div[role="dialog"] {
+  background-color: #08131c !important;
+  opacity: 1 !important;
+  border: 1px solid rgba(57, 230, 194, 0.35) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 24px rgba(57, 230, 194, 0.15) !important;
+}
+
+/* 3. Settings Internal Panels & Sections (Solid Opaque Backgrounds) */
+.settings-modal-container div,
+.settings-modal-container section,
+.settings-modal-container main,
+.agy-dialog div {
+  /* Prevent transparent bleed-through inside modal */
+}
+
+.settings-modal-container .bg-background,
+.settings-modal-container div[class*="bg-background"],
+.agy-dialog .bg-background,
+.agy-dialog div[class*="bg-background"] {
+  background-color: #08131c !important;
+}
+
+/* Settings Left Navigation Sidebar (General, Appearance, etc.) */
+.settings-modal-container .bg-sidebar,
+.settings-modal-container div[class*="bg-sidebar"] {
+  background-color: #050d14 !important;
+  border-right: 1px solid rgba(57, 230, 194, 0.18) !important;
+}
+
+/* Settings Cards & Options Items */
+.settings-modal-container .bg-card,
+.settings-modal-container div[class*="bg-card"],
+.settings-modal-container div[class*="border-card-border"],
+.settings-modal-container div[class*="rounded-xl border border-border"] {
+  background-color: #0c1c28 !important;
+  border: 1px solid rgba(57, 230, 194, 0.22) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Settings Buttons, Dropdowns & Controls */
+.settings-modal-container select,
+.settings-modal-container input,
+.settings-modal-container textarea {
+  background-color: #07121a !important;
+  border-color: rgba(57, 230, 194, 0.3) !important;
+  color: #D9FFFF !important;
+}
+.settings-modal-container select:focus,
+.settings-modal-container input:focus,
+.settings-modal-container textarea:focus {
+  border-color: #39E6C2 !important;
+  box-shadow: 0 0 10px rgba(57, 230, 194, 0.4) !important;
+}
+
+/* Navigation items active in Settings */
+.settings-modal-container div[role="button"]:hover,
+.settings-modal-container button:hover {
+  background-color: rgba(57, 230, 194, 0.12) !important;
+}
+
+
+/* ==========================================================================
+ * TOP BAR, DROPDOWN MENUS & POPOVER Z-INDEX FIX
+ * Prevents top-left menu buttons and dropdowns from being occluded or clipped
+ * ========================================================================== */
+
+/* 1. Elevate top navigation bar container above sidebar & main viewport */
+.agy-shell > div.shrink-0:has(div.bg-sidebar),
+div.flex.items-center.gap-1.px-2.h-full.bg-sidebar,
+div[class*="flex items-center gap-1 px-2 h-full bg-sidebar"] {
+  position: relative !important;
+  z-index: 2000 !important;
+  overflow: visible !important;
+}
+
+/* Ensure sidebar toggle toolbar remains pinned to top-left */
+div.absolute.left-0.top-0,
+div[class*="absolute left-0 top-0"] {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  z-index: 50 !important;
+}
+
+/* 2. All Dropdowns, Menus, Selects, and Popovers */
+[role="menu"],
+[role="listbox"],
+[role="dialog"]:not(.settings-modal-container),
+div[class*="dropdown-menu"],
+div[class*="popover"],
+div[data-radix-popper-content-wrapper],
+div[data-radix-menu-content],
+div[data-radix-select-content] {
+  position: relative !important;
+  z-index: 99999 !important;
+  background-color: #0b1924 !important;
+  border: 1px solid rgba(57, 230, 194, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 16px rgba(57, 230, 194, 0.2) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  opacity: 1 !important;
+  border-radius: 8px !important;
+}
+
+/* Ensure menu items inside are crisp and highlighted properly */
+[role="menuitem"],
+[role="option"] {
+  color: #D9FFFF !important;
+}
+[role="menuitem"]:hover,
+[role="menuitem"][data-highlighted],
+[role="option"]:hover,
+[role="option"][data-highlighted] {
+  background-color: rgba(57, 230, 194, 0.18) !important;
+  color: #39E6C2 !important;
+}
+
+/* Ensure sidebar header icons do not create weird overflow clipping */
+.bg-sidebar {
+  overflow: visible !important;
+}
+
+
+/* ==========================================================================
+ * TOPBAR MENU & ALL DROPDOWN SOLID OPAQUE FIX
+ * Prevents dropdown menus from being semi-transparent and overlapping background
+ * ========================================================================== */
+
+/* All dropdown popups, top menus, and floating surface-opaque containers */
+div.absolute.top-full,
+div.surface-opaque,
+div[class*="border-menu-border"],
+div[class*="shadow-lg"][class*="min-w-"],
+div[class*="surface-opaque"],
+[role="menu"],
+[role="listbox"],
+div[data-radix-popper-content-wrapper] > div,
+div[data-radix-menu-content] {
+  background-color: #07121b !important;
+  background: #07121b !important;
+  opacity: 1 !important;
+  border: 1px solid rgba(57, 230, 194, 0.38) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.95), 0 0 20px rgba(57, 230, 194, 0.25) !important;
+  border-radius: 8px !important;
+  z-index: 99999 !important;
+}
+
+/* Ensure menu items inside have crisp hover styles and solid text */
+div.absolute.top-full button,
+div.surface-opaque button,
+[role="menuitem"],
+[role="option"] {
+  background-color: transparent;
+  color: #D9FFFF !important;
+  opacity: 1 !important;
+}
+
+div.absolute.top-full button:hover,
+div.surface-opaque button:hover,
+[role="menuitem"]:hover,
+[role="menuitem"][data-highlighted],
+[role="option"]:hover,
+[role="option"][data-highlighted] {
+  background-color: rgba(57, 230, 194, 0.18) !important;
+  color: #39E6C2 !important;
+}
