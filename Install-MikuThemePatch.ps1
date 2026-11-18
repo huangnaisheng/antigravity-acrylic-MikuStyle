@@ -25,7 +25,6 @@ $backupFile = Join-Path $resourcesDir "app.asar.bak"
 
 if (-not (Test-Path $asarFile)) {
     Write-Host "$pink[!] 未找到 Antigravity 安装目录下的 app.asar: $asarFile$reset"
-    Write-Host "$dim    请确认 Antigravity 已安装在标准用户路径: $appDir$reset"
     exit 1
 }
 
@@ -39,35 +38,25 @@ if (Test-Path $repoCss) {
         New-Item -ItemType Directory -Path $geminiDir -Force | Out-Null
     }
     Copy-Item -Path $repoCss -Destination $targetCss -Force
-    Write-Host "$teal[0/5] 样式配置文件已部署至: $targetCss$reset"
+    Write-Host "$teal[0/4] 样式配置文件已部署至: $targetCss$reset"
 }
 
-# 1. 关闭正在运行的 Antigravity 进程
-$procs = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
-if ($procs) {
-    Write-Host "$dim[1/5] 正在停止 Antigravity 进程以便安全更新 asar...$reset"
-    $procs | Stop-Process -Force
-    Start-Sleep -Seconds 1
-} else {
-    Write-Host "$dim[1/5] Antigravity 未运行，继续处理...$reset"
-}
-
-# 2. 备份官方出厂原始 app.asar
+# 1. 备份官方出厂原始 app.asar
 if (-not (Test-Path $backupFile)) {
-    Write-Host "$blue[2/5] 正在创建官方出厂备份 app.asar.bak...$reset"
+    Write-Host "$blue[1/4] 正在创建官方出厂备份 app.asar.bak...$reset"
     Copy-Item -Path $asarFile -Destination $backupFile -Force
 } else {
-    Write-Host "$dim[2/5] 官方备份 app.asar.bak 已存在，跳过备份。$reset"
+    Write-Host "$dim[1/4] 官方备份 app.asar.bak 已存在。$reset"
 }
 
-# 3. 解包 app.asar 并修补主进程 dist/utils.js
-$tempUnpack = Join-Path $env:TEMP "antigravity-asar-patch"
+# 2. 解包 app.asar
+$tempUnpack = Join-Path $env:TEMP "antigravity-permanent-patch"
 if (Test-Path $tempUnpack) {
     Remove-Item -Path $tempUnpack -Recurse -Force
 }
 New-Item -ItemType Directory -Path $tempUnpack -Force | Out-Null
 
-Write-Host "$blue[3/5] 正在解包 app.asar 进行代码注入...$reset"
+Write-Host "$blue[2/4] 正在解包 app.asar 进行代码注入...$reset"
 npx asar extract $asarFile $tempUnpack
 
 $utilsFile = Join-Path $tempUnpack "dist\utils.js"
@@ -78,13 +67,58 @@ if (-not (Test-Path $utilsFile)) {
 
 $utilsContent = [System.IO.File]::ReadAllText($utilsFile, [System.Text.Encoding]::UTF8)
 
-# 注入代码块
+# 3. 注入自包含视频流微服务器与动态主题挂载钩子
 $injectionCode = @'
 
-        // === ANTIGRAVITY CYBER THEME INJECTION ===
+    // === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE ===
+    try {
+        const http = require('http');
+        const fs = require('fs');
+        const path = require('path');
         const os = require('os');
+
+        // 1. Native In-Process Video Streaming Server (Port 43939)
+        const possibleVideoPaths = [
+            'd:\\Study\\gemini美化\\miku_1080p_16s.mp4',
+            path.join(os.homedir(), '.gemini', 'miku_1080p_16s.mp4'),
+            path.join(os.homedir(), '.gemini', 'background.mp4')
+        ];
+        let videoFile = possibleVideoPaths.find(p => fs.existsSync(p)) || possibleVideoPaths[0];
+
+        const streamServer = http.createServer((req, res) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            if (!fs.existsSync(videoFile)) {
+                res.writeHead(404);
+                return res.end();
+            }
+            const stat = fs.statSync(videoFile);
+            const range = req.headers.range;
+            if (range) {
+                const parts = range.replace(/bytes=/, "").split("-");
+                const start = parseInt(parts[0], 10);
+                const end = parts[1] ? parseInt(parts[1], 10) : stat.size - 1;
+                const chunksize = (end - start) + 1;
+                const file = fs.createReadStream(videoFile, { start, end });
+                res.writeHead(206, {
+                    'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunksize,
+                    'Content-Type': 'video/mp4',
+                });
+                file.pipe(res);
+            } else {
+                res.writeHead(200, {
+                    'Content-Length': stat.size,
+                    'Content-Type': 'video/mp4',
+                });
+                fs.createReadStream(videoFile).pipe(res);
+            }
+        });
+        streamServer.on('error', () => {});
+        streamServer.listen(43939, '127.0.0.1');
+
+        // 2. Auto Dynamic Theme Injector on Page Load
         const themeCssPath = path.join(os.homedir(), '.gemini', 'antigravity-miku-theme.css');
-        
         const injectCustomTheme = () => {
             try {
                 let cssContent = '';
@@ -159,47 +193,32 @@ $injectionCode = @'
 
         hubContents.on('dom-ready', injectCustomTheme);
         hubContents.on('did-finish-load', injectCustomTheme);
+    } catch (e) {}
 '@
 
-# 替换或挂载到 win.loadURL(url) 之前
 if (-not ($utilsContent -match "injectCustomTheme")) {
     $targetString = "void win.loadURL(url);"
     if ($utilsContent.Contains($targetString)) {
         $utilsContent = $utilsContent.Replace($targetString, "$injectionCode`n    void win.loadURL(url);")
         [System.IO.File]::WriteAllText($utilsFile, $utilsContent, [System.Text.Encoding]::UTF8)
-        Write-Host "$teal[√] 成功注入钩子到 createWindow / utils.js！$reset"
+        Write-Host "$teal[3/4] 成功注入自包含原生引擎到 createWindow / utils.js！$reset"
     } else {
         Write-Host "$pink[!] 未找到挂载锚点 void win.loadURL(url);$reset"
         exit 1
     }
 } else {
-    Write-Host "$dim[√] utils.js 中已包含注入代码。$reset"
+    Write-Host "$dim[3/4] utils.js 中已包含注入代码。$reset"
 }
 
 # 4. 重新打包为 app.asar
-Write-Host "$blue[4/5] 正在重新打包 app.asar...$reset"
-npx asar pack $tempUnpack $asarFile
+Write-Host "$blue[4/4] 正在重新打包 app.asar...$reset"
+$repackedAsar = Join-Path $resourcesDir "app.asar.patched"
+npx asar pack $tempUnpack $repackedAsar --unpack "node_modules/**"
+Copy-Item -Path $repackedAsar -Destination $asarFile -Force
+Remove-Item -Path $repackedAsar -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $tempUnpack -Recurse -Force -ErrorAction SilentlyContinue
 
-# 5. 确保本地视频流服务自启脚本存在
-$streamServer = Join-Path $PSScriptRoot "stream_server.js"
-Write-Host "$blue[5/5] 正在检查视频流服务器...$reset"
-if (Test-Path $streamServer) {
-    $running = $false
-    try {
-        $res = Invoke-WebRequest -Uri "http://127.0.0.1:43939/video.mp4" -Method Head -TimeoutSec 1 -ErrorAction SilentlyContinue
-        if ($res.StatusCode -eq 200) { $running = $true }
-    } catch {}
-
-    if (-not $running) {
-        Start-Process -FilePath "node" -ArgumentList "`"$streamServer`"" -WindowStyle Hidden
-        Write-Host "$teal  [√] 视频流服务已在后台静默启动 (Port 43939)$reset"
-    } else {
-        Write-Host "$dim  [√] 视频流服务已在运行中 (Port 43939)$reset"
-    }
-}
-
 Write-Host ""
-Write-Host "$teal  [39] ANTIGRAVITY 美化补丁已完整注入！$reset"
-Write-Host "$teal  启动或重启 Antigravity 即可享受极致亚克力赛博动态美化！$reset"
+Write-Host "$teal  [39] ANTIGRAVITY 自包含美化补丁已永久注入！$reset"
+Write-Host "$teal  无需运行外部后台服务，启动 Antigravity 即可全天候自动生效！$reset"
 Write-Host ""
