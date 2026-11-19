@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  一键修补并安装 Antigravity 终端赛博动态壁纸与亚克力毛玻璃主题。
+  一键修补并安装 Antigravity 终端赛博动态壁纸与亚克力毛玻璃主题（V2 流畅高刷防卡顿引擎）。
   在 Antigravity 软件更新或初次安装后，只需运行本脚本即可全自动注入并恢复完整美化。
 #>
 $ErrorActionPreference = "Stop"
@@ -13,9 +13,9 @@ $reset = "$([char]27)[0m"
 
 Write-Host ""
 Write-Host "$teal  ╔═══════════════════════════════════════════════════════════╗$reset"
-Write-Host "$teal  ║    ANTIGRAVITY CYBER ACRYLIC THEME AUTO-PATCHER (39)     ║$reset"
+Write-Host "$teal  ║    ANTIGRAVITY CYBER ACRYLIC THEME AUTO-PATCHER (V2)      ║$reset"
 Write-Host "$teal  ╚═══════════════════════════════════════════════════════════╝$reset"
-Write-Host "$dim  正在准备注入动态壁纸、亚克力磨砂毛玻璃与节能引擎...$reset"
+Write-Host "$dim  正在准备注入无损内存流媒体、无缝循环防卡死与节能引擎...$reset"
 Write-Host ""
 
 $appDir = "$env:LOCALAPPDATA\Programs\antigravity"
@@ -67,57 +67,81 @@ if (-not (Test-Path $utilsFile)) {
 
 $utilsContent = [System.IO.File]::ReadAllText($utilsFile, [System.Text.Encoding]::UTF8)
 
-# 3. 注入自包含视频流微服务器与动态主题挂载钩子
+# 如果之前已有旧注入，先剔除再写入最新的 V2 引擎
+$startMark = '// === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE'
+if ($utilsContent.Contains($startMark)) {
+    $idx = $utilsContent.IndexOf($startMark)
+    $endIdx = $utilsContent.IndexOf('void win.loadURL(url);', $idx)
+    $utilsContent = $utilsContent.Substring(0, $idx) + $utilsContent.Substring($endIdx)
+}
+
+# 3. 注入 V2 高性能内存流媒体与防卡顿守护引擎
 $injectionCode = @'
 
-    // === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE ===
+    // === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE (V2 SMOOTH) ===
     try {
         const http = require('http');
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
 
-        // 1. Native In-Process Video Streaming Server (Port 43939)
+        // 1. Native In-Memory High-Performance Video Streaming Server (Port 43939)
         const possibleVideoPaths = [
             'd:\\Study\\gemini美化\\miku_1080p_16s.mp4',
             path.join(os.homedir(), '.gemini', 'miku_1080p_16s.mp4'),
             path.join(os.homedir(), '.gemini', 'background.mp4')
         ];
         let videoFile = possibleVideoPaths.find(p => fs.existsSync(p)) || possibleVideoPaths[0];
+        
+        // Pre-load the 2.9MB video into RAM buffer for zero-latency instant streaming
+        let videoBuf = null;
+        try {
+            if (fs.existsSync(videoFile)) {
+                videoBuf = fs.readFileSync(videoFile);
+            }
+        } catch (_) {}
 
         const streamServer = http.createServer((req, res) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
-            if (!fs.existsSync(videoFile)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            
+            if (!videoBuf) {
+                try {
+                    if (fs.existsSync(videoFile)) videoBuf = fs.readFileSync(videoFile);
+                } catch (_) {}
+            }
+            if (!videoBuf) {
                 res.writeHead(404);
                 return res.end();
             }
-            const stat = fs.statSync(videoFile);
+
+            const total = videoBuf.length;
             const range = req.headers.range;
             if (range) {
                 const parts = range.replace(/bytes=/, "").split("-");
                 const start = parseInt(parts[0], 10);
-                const end = parts[1] ? parseInt(parts[1], 10) : stat.size - 1;
+                const end = parts[1] ? parseInt(parts[1], 10) : total - 1;
                 const chunksize = (end - start) + 1;
-                const file = fs.createReadStream(videoFile, { start, end });
                 res.writeHead(206, {
-                    'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+                    'Content-Range': `bytes ${start}-${end}/${total}`,
                     'Accept-Ranges': 'bytes',
                     'Content-Length': chunksize,
                     'Content-Type': 'video/mp4',
                 });
-                file.pipe(res);
+                res.end(videoBuf.subarray(start, end + 1));
             } else {
                 res.writeHead(200, {
-                    'Content-Length': stat.size,
+                    'Content-Length': total,
                     'Content-Type': 'video/mp4',
+                    'Accept-Ranges': 'bytes',
                 });
-                fs.createReadStream(videoFile).pipe(res);
+                res.end(videoBuf);
             }
         });
         streamServer.on('error', () => {});
         streamServer.listen(43939, '127.0.0.1');
 
-        // 2. Auto Dynamic Theme Injector on Page Load
+        // 2. Auto Dynamic Theme & Smooth Playback Injector on Page Load
         const themeCssPath = path.join(os.homedir(), '.gemini', 'antigravity-miku-theme.css');
         const injectCustomTheme = () => {
             try {
@@ -135,6 +159,7 @@ $injectionCode = @'
                         vid.loop = true;
                         vid.muted = true;
                         vid.playsInline = true;
+                        vid.setAttribute('preload', 'auto');
                         document.body.prepend(vid);
                     }
                     vid.src = 'http://127.0.0.1:43939/video.mp4';
@@ -152,23 +177,61 @@ $injectionCode = @'
                     ].join(';');
                     vid.play().catch(() => {});
 
-                    // Eco Mode (Wallpaper Engine Style Auto-Pause)
+                    // === Eco Mode & Anti-Stall Watchdog ===
                     if (window.__ecoModeCleanup) {
                         window.__ecoModeCleanup();
                     }
+
+                    // 1. Precise Visibility Handling (Pauses only when truly hidden/minimized)
                     const onVisibilityChange = () => {
-                        if (document.hidden) vid.pause();
-                        else vid.play().catch(() => {});
+                        if (document.hidden) {
+                            vid.pause();
+                        } else {
+                            vid.play().catch(() => {});
+                        }
                     };
-                    const onWindowBlur = () => { vid.pause(); };
-                    const onWindowFocus = () => { if (!document.hidden) vid.play().catch(() => {}); };
                     document.addEventListener('visibilitychange', onVisibilityChange);
-                    window.addEventListener('blur', onWindowBlur);
-                    window.addEventListener('focus', onWindowFocus);
+
+                    // 2. Seamless Loop Handler (Prevents EOF freeze)
+                    const onEnded = () => {
+                        vid.currentTime = 0;
+                        vid.play().catch(() => {});
+                    };
+                    vid.addEventListener('ended', onEnded);
+
+                    // 3. Stalled / Waiting Auto-Recovery
+                    const onStalled = () => {
+                        if (!document.hidden && vid.paused) {
+                            vid.play().catch(() => {});
+                        }
+                    };
+                    vid.addEventListener('stalled', onStalled);
+                    vid.addEventListener('waiting', onStalled);
+
+                    // 4. Anti-Freeze Watchdog (Ensures it never stays paused while window is visible)
+                    const watchdogInterval = setInterval(() => {
+                        if (!document.hidden && vid.paused) {
+                            vid.play().catch(() => {});
+                        }
+                    }, 2000);
+
+                    // 5. User Interaction Wakeup (Instant resume on click/key if paused)
+                    const onUserActivity = () => {
+                        if (!document.hidden && vid.paused) {
+                            vid.play().catch(() => {});
+                        }
+                    };
+                    window.addEventListener('pointerdown', onUserActivity, { passive: true });
+                    window.addEventListener('keydown', onUserActivity, { passive: true });
+
                     window.__ecoModeCleanup = () => {
                         document.removeEventListener('visibilitychange', onVisibilityChange);
-                        window.removeEventListener('blur', onWindowBlur);
-                        window.removeEventListener('focus', onWindowFocus);
+                        vid.removeEventListener('ended', onEnded);
+                        vid.removeEventListener('stalled', onStalled);
+                        vid.removeEventListener('waiting', onStalled);
+                        clearInterval(watchdogInterval);
+                        window.removeEventListener('pointerdown', onUserActivity);
+                        window.removeEventListener('keydown', onUserActivity);
                     };
 
                     let styleEl = document.getElementById('antigravity-miku-theme');
@@ -196,18 +259,14 @@ $injectionCode = @'
     } catch (e) {}
 '@
 
-if (-not ($utilsContent -match "injectCustomTheme")) {
-    $targetString = "void win.loadURL(url);"
-    if ($utilsContent.Contains($targetString)) {
-        $utilsContent = $utilsContent.Replace($targetString, "$injectionCode`n    void win.loadURL(url);")
-        [System.IO.File]::WriteAllText($utilsFile, $utilsContent, [System.Text.Encoding]::UTF8)
-        Write-Host "$teal[3/4] 成功注入自包含原生引擎到 createWindow / utils.js！$reset"
-    } else {
-        Write-Host "$pink[!] 未找到挂载锚点 void win.loadURL(url);$reset"
-        exit 1
-    }
+$targetString = "void win.loadURL(url);"
+if ($utilsContent.Contains($targetString)) {
+    $utilsContent = $utilsContent.Replace($targetString, "$injectionCode`n    void win.loadURL(url);")
+    [System.IO.File]::WriteAllText($utilsFile, $utilsContent, [System.Text.Encoding]::UTF8)
+    Write-Host "$teal[3/4] 成功注入 V2 高性能防卡顿引擎到 utils.js！$reset"
 } else {
-    Write-Host "$dim[3/4] utils.js 中已包含注入代码。$reset"
+    Write-Host "$pink[!] 未找到挂载锚点 void win.loadURL(url);$reset"
+    exit 1
 }
 
 # 4. 禁用静默后台自动覆盖 (updater.js)
@@ -230,6 +289,6 @@ Remove-Item -Path $repackedAsar -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $tempUnpack -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
-Write-Host "$teal  [39] ANTIGRAVITY 自包含美化补丁已永久注入！$reset"
-Write-Host "$teal  重启 Antigravity 客户端即可完全生效并持久锁定！$reset"
+Write-Host "$teal  [39] ANTIGRAVITY V2 高刷防卡顿引擎已永久注入！$reset"
+Write-Host "$teal  请重启 Antigravity 客户端即可完全生效！$reset"
 Write-Host ""
