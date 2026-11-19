@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  一键修补并安装 Antigravity 终端赛博动态壁纸与亚克力毛玻璃主题（V2 流畅高刷防卡顿引擎）。
+  一键修补并安装 Antigravity 终端赛博动态壁纸与亚克力毛玻璃主题（V3 本地 Blob 零寻道 + 帧率看门狗引擎）。
   在 Antigravity 软件更新或初次安装后，只需运行本脚本即可全自动注入并恢复完整美化。
 #>
 $ErrorActionPreference = "Stop"
@@ -13,9 +13,9 @@ $reset = "$([char]27)[0m"
 
 Write-Host ""
 Write-Host "$teal  ╔═══════════════════════════════════════════════════════════╗$reset"
-Write-Host "$teal  ║    ANTIGRAVITY CYBER ACRYLIC THEME AUTO-PATCHER (V2)      ║$reset"
+Write-Host "$teal  ║    ANTIGRAVITY CYBER ACRYLIC THEME AUTO-PATCHER (V3)      ║$reset"
 Write-Host "$teal  ╚═══════════════════════════════════════════════════════════╝$reset"
-Write-Host "$dim  正在准备注入无损内存流媒体、无缝循环防卡死与节能引擎...$reset"
+Write-Host "$dim  正在准备注入 V3 本地 Blob 内存播放、硬件解码防死锁与节能引擎...$reset"
 Write-Host ""
 
 $appDir = "$env:LOCALAPPDATA\Programs\antigravity"
@@ -67,7 +67,7 @@ if (-not (Test-Path $utilsFile)) {
 
 $utilsContent = [System.IO.File]::ReadAllText($utilsFile, [System.Text.Encoding]::UTF8)
 
-# 如果之前已有旧注入，先剔除再写入最新的 V2 引擎
+# 如果之前已有旧注入，先剔除再写入最新的 V3 引擎
 $startMark = '// === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE'
 if ($utilsContent.Contains($startMark)) {
     $idx = $utilsContent.IndexOf($startMark)
@@ -75,73 +75,70 @@ if ($utilsContent.Contains($startMark)) {
     $utilsContent = $utilsContent.Substring(0, $idx) + $utilsContent.Substring($endIdx)
 }
 
-# 3. 注入 V2 高性能内存流媒体与防卡顿守护引擎
+# 3. 注入 V3 本地 Blob 内存播放 + 真帧进监测看门狗引擎
 $injectionCode = @'
 
-    // === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE (V2 SMOOTH) ===
+    // === ANTIGRAVITY SELF-CONTAINED CYBER ACRYLIC THEME ENGINE (V3 BLOB + WATCHDOG) ===
     try {
         const http = require('http');
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
 
-        // 1. Native In-Memory High-Performance Video Streaming Server (Port 43939)
-        const possibleVideoPaths = [
-            'd:\\Study\\gemini美化\\miku_1080p_16s.mp4',
-            path.join(os.homedir(), '.gemini', 'miku_1080p_16s.mp4'),
-            path.join(os.homedir(), '.gemini', 'background.mp4')
-        ];
-        let videoFile = possibleVideoPaths.find(p => fs.existsSync(p)) || possibleVideoPaths[0];
-        
-        // Pre-load the 2.9MB video into RAM buffer for zero-latency instant streaming
-        let videoBuf = null;
-        try {
-            if (fs.existsSync(videoFile)) {
-                videoBuf = fs.readFileSync(videoFile);
-            }
-        } catch (_) {}
+        // 1. Singleton In-Memory Video Streaming Server (Port 43939)
+        if (!global.__agyStreamServerStarted) {
+            global.__agyStreamServerStarted = true;
+            const possibleVideoPaths = [
+                'd:\\Study\\gemini美化\\miku_1080p_16s.mp4',
+                path.join(os.homedir(), '.gemini', 'miku_1080p_16s.mp4'),
+                path.join(os.homedir(), '.gemini', 'background.mp4')
+            ];
+            let videoFile = possibleVideoPaths.find(p => fs.existsSync(p)) || possibleVideoPaths[0];
+            let videoBuf = null;
+            try {
+                if (fs.existsSync(videoFile)) videoBuf = fs.readFileSync(videoFile);
+            } catch (_) {}
 
-        const streamServer = http.createServer((req, res) => {
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-            
-            if (!videoBuf) {
-                try {
-                    if (fs.existsSync(videoFile)) videoBuf = fs.readFileSync(videoFile);
-                } catch (_) {}
-            }
-            if (!videoBuf) {
-                res.writeHead(404);
-                return res.end();
-            }
+            const streamServer = http.createServer((req, res) => {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+                if (!videoBuf) {
+                    try {
+                        if (fs.existsSync(videoFile)) videoBuf = fs.readFileSync(videoFile);
+                    } catch (_) {}
+                }
+                if (!videoBuf) {
+                    res.writeHead(404);
+                    return res.end();
+                }
+                const total = videoBuf.length;
+                const range = req.headers.range;
+                if (range) {
+                    const parts = range.replace(/bytes=/, "").split("-");
+                    const start = Math.max(0, parseInt(parts[0], 10) || 0);
+                    const end = parts[1] ? Math.min(total - 1, parseInt(parts[1], 10)) : total - 1;
+                    const chunksize = (end - start) + 1;
+                    res.writeHead(206, {
+                        'Content-Range': `bytes ${start}-${end}/${total}`,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': chunksize,
+                        'Content-Type': 'video/mp4',
+                    });
+                    res.end(videoBuf.subarray(start, end + 1));
+                } else {
+                    res.writeHead(200, {
+                        'Content-Length': total,
+                        'Content-Type': 'video/mp4',
+                        'Accept-Ranges': 'bytes',
+                    });
+                    res.end(videoBuf);
+                }
+            });
+            streamServer.on('error', () => {});
+            streamServer.listen(43939, '127.0.0.1');
+        }
 
-            const total = videoBuf.length;
-            const range = req.headers.range;
-            if (range) {
-                const parts = range.replace(/bytes=/, "").split("-");
-                const start = parseInt(parts[0], 10);
-                const end = parts[1] ? parseInt(parts[1], 10) : total - 1;
-                const chunksize = (end - start) + 1;
-                res.writeHead(206, {
-                    'Content-Range': `bytes ${start}-${end}/${total}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': chunksize,
-                    'Content-Type': 'video/mp4',
-                });
-                res.end(videoBuf.subarray(start, end + 1));
-            } else {
-                res.writeHead(200, {
-                    'Content-Length': total,
-                    'Content-Type': 'video/mp4',
-                    'Accept-Ranges': 'bytes',
-                });
-                res.end(videoBuf);
-            }
-        });
-        streamServer.on('error', () => {});
-        streamServer.listen(43939, '127.0.0.1');
-
-        // 2. Auto Dynamic Theme & Smooth Playback Injector on Page Load
+        // 2. Auto Dynamic Theme & V3 Anti-Freeze Video Injector
         const themeCssPath = path.join(os.homedir(), '.gemini', 'antigravity-miku-theme.css');
         const injectCustomTheme = () => {
             try {
@@ -160,29 +157,50 @@ $injectionCode = @'
                         vid.muted = true;
                         vid.playsInline = true;
                         vid.setAttribute('preload', 'auto');
+                        vid.style.cssText = [
+                            'position: fixed',
+                            'top: 0',
+                            'left: 0',
+                            'width: 100vw',
+                            'height: 100vh',
+                            'object-fit: cover',
+                            'opacity: 0.5',
+                            'pointer-events: none',
+                            'z-index: 0',
+                            'transform: translateZ(0)',
+                            'will-change: transform'
+                        ].join(';');
                         document.body.prepend(vid);
                     }
-                    vid.src = 'http://127.0.0.1:43939/video.mp4';
-                    vid.style.cssText = [
-                        'position: fixed',
-                        'top: 0',
-                        'left: 0',
-                        'width: 100vw',
-                        'height: 100vh',
-                        'object-fit: cover',
-                        'opacity: 0.5',
-                        'pointer-events: none',
-                        'z-index: 0',
-                        'filter: saturate(1.2) contrast(1.05)'
-                    ].join(';');
-                    vid.play().catch(() => {});
 
-                    // === Eco Mode & Anti-Stall Watchdog ===
+                    // Load full MP4 into local Blob URL once (zero network seeks on loop)
+                    if (!window.__mikuVideoLoading && (!vid.src || (!vid.src.startsWith('blob:') && !vid.src.includes('43939')))) {
+                        window.__mikuVideoLoading = true;
+                        fetch('http://127.0.0.1:43939/video.mp4')
+                            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+                            .then(blob => {
+                                if (window.__mikuBlobUrl) {
+                                    try { URL.revokeObjectURL(window.__mikuBlobUrl); } catch (_) {}
+                                }
+                                window.__mikuBlobUrl = URL.createObjectURL(blob);
+                                vid.src = window.__mikuBlobUrl;
+                                vid.play().catch(() => {});
+                                window.__mikuVideoLoading = false;
+                            })
+                            .catch(() => {
+                                vid.src = 'http://127.0.0.1:43939/video.mp4';
+                                vid.play().catch(() => {});
+                                window.__mikuVideoLoading = false;
+                            });
+                    } else if (!document.hidden && vid.paused && vid.src) {
+                        vid.play().catch(() => {});
+                    }
+
+                    // === V3 Eco Mode & True currentTime Freeze-Detection Watchdog ===
                     if (window.__ecoModeCleanup) {
                         window.__ecoModeCleanup();
                     }
 
-                    // 1. Precise Visibility Handling (Pauses only when truly hidden/minimized)
                     const onVisibilityChange = () => {
                         if (document.hidden) {
                             vid.pause();
@@ -192,32 +210,39 @@ $injectionCode = @'
                     };
                     document.addEventListener('visibilitychange', onVisibilityChange);
 
-                    // 2. Seamless Loop Handler (Prevents EOF freeze)
-                    const onEnded = () => {
-                        vid.currentTime = 0;
-                        vid.play().catch(() => {});
-                    };
-                    vid.addEventListener('ended', onEnded);
-
-                    // 3. Stalled / Waiting Auto-Recovery
-                    const onStalled = () => {
-                        if (!document.hidden && vid.paused) {
-                            vid.play().catch(() => {});
-                        }
-                    };
-                    vid.addEventListener('stalled', onStalled);
-                    vid.addEventListener('waiting', onStalled);
-
-                    // 4. Anti-Freeze Watchdog (Ensures it never stays paused while window is visible)
+                    let lastTime = -1;
+                    let stuckCount = 0;
                     const watchdogInterval = setInterval(() => {
-                        if (!document.hidden && vid.paused) {
-                            vid.play().catch(() => {});
+                        if (document.hidden || !vid.src) {
+                            stuckCount = 0;
+                            return;
                         }
-                    }, 2000);
+                        if (vid.paused) {
+                            vid.play().catch(() => {});
+                            return;
+                        }
+                        const cur = vid.currentTime;
+                        if (Math.abs(cur - lastTime) < 0.01) {
+                            stuckCount++;
+                            if (stuckCount === 2) {
+                                const dur = vid.duration || 16;
+                                vid.currentTime = (cur >= dur - 0.4) ? 0 : (cur + 0.05);
+                                vid.play().catch(() => {});
+                            } else if (stuckCount >= 4) {
+                                const targetSrc = window.__mikuBlobUrl || 'http://127.0.0.1:43939/video.mp4';
+                                vid.src = targetSrc;
+                                vid.load();
+                                vid.play().catch(() => {});
+                                stuckCount = 0;
+                            }
+                        } else {
+                            stuckCount = 0;
+                        }
+                        lastTime = cur;
+                    }, 1500);
 
-                    // 5. User Interaction Wakeup (Instant resume on click/key if paused)
                     const onUserActivity = () => {
-                        if (!document.hidden && vid.paused) {
+                        if (!document.hidden && vid.paused && vid.src) {
                             vid.play().catch(() => {});
                         }
                     };
@@ -226,9 +251,6 @@ $injectionCode = @'
 
                     window.__ecoModeCleanup = () => {
                         document.removeEventListener('visibilitychange', onVisibilityChange);
-                        vid.removeEventListener('ended', onEnded);
-                        vid.removeEventListener('stalled', onStalled);
-                        vid.removeEventListener('waiting', onStalled);
                         clearInterval(watchdogInterval);
                         window.removeEventListener('pointerdown', onUserActivity);
                         window.removeEventListener('keydown', onUserActivity);
@@ -263,7 +285,7 @@ $targetString = "void win.loadURL(url);"
 if ($utilsContent.Contains($targetString)) {
     $utilsContent = $utilsContent.Replace($targetString, "$injectionCode`n    void win.loadURL(url);")
     [System.IO.File]::WriteAllText($utilsFile, $utilsContent, [System.Text.Encoding]::UTF8)
-    Write-Host "$teal[3/4] 成功注入 V2 高性能防卡顿引擎到 utils.js！$reset"
+    Write-Host "$teal[3/4] 成功注入 V3 本地 Blob 防卡顿引擎到 utils.js！$reset"
 } else {
     Write-Host "$pink[!] 未找到挂载锚点 void win.loadURL(url);$reset"
     exit 1
@@ -289,6 +311,6 @@ Remove-Item -Path $repackedAsar -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $tempUnpack -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
-Write-Host "$teal  [39] ANTIGRAVITY V2 高刷防卡顿引擎已永久注入！$reset"
+Write-Host "$teal  [39] ANTIGRAVITY V3 引擎已永久注入！$reset"
 Write-Host "$teal  请重启 Antigravity 客户端即可完全生效！$reset"
 Write-Host ""
