@@ -210,7 +210,18 @@ if (-not ($utilsContent -match "injectCustomTheme")) {
     Write-Host "$dim[3/4] utils.js 中已包含注入代码。$reset"
 }
 
-# 4. 重新打包为 app.asar
+# 4. 禁用静默后台自动覆盖 (updater.js)
+$updaterFile = Join-Path $tempUnpack "dist\updater.js"
+if (Test-Path $updaterFile) {
+    $upContent = [System.IO.File]::ReadAllText($updaterFile, [System.Text.Encoding]::UTF8)
+    $upContent = $upContent -replace "autoDownload\s*=\s*true;", "autoDownload = false;"
+    $upContent = $upContent -replace "autoInstallOnAppQuit\s*=\s*electron_1\.app\.isPackaged;", "autoInstallOnAppQuit = false;"
+    $upContent = $upContent -replace "function startAutoUpdateChecks\(\)\s*\{", "function startAutoUpdateChecks() { return;"
+    [System.IO.File]::WriteAllText($updaterFile, $upContent, [System.Text.Encoding]::UTF8)
+    Write-Host "$teal[3/4+] 已禁用静默后台自动下载与覆盖！$reset"
+}
+
+# 5. 重新打包为 app.asar
 Write-Host "$blue[4/4] 正在重新打包 app.asar...$reset"
 $repackedAsar = Join-Path $resourcesDir "app.asar.patched"
 npx asar pack $tempUnpack $repackedAsar --unpack "node_modules/**"
@@ -220,5 +231,5 @@ Remove-Item -Path $tempUnpack -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "$teal  [39] ANTIGRAVITY 自包含美化补丁已永久注入！$reset"
-Write-Host "$teal  无需运行外部后台服务，启动 Antigravity 即可全天候自动生效！$reset"
+Write-Host "$teal  重启 Antigravity 客户端即可完全生效并持久锁定！$reset"
 Write-Host ""
